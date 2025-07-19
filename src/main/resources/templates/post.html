@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>post</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <style>
+        .my-box {
+            border: 3px solid;
+            padding: 3px;
+            border-radius: 3px;
+            border-color: #ced4da;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-4">
+    <!-- 게시판 네비게이션 -->
+    <div th:replace="fragments/header :: siteHeader"></div>
+
+    <!-- 제목 -->
+    <div class="border rounded-2 p-3">
+        <h3 th:text="${post.title}" class="mb-3">게시글 제목</h3>
+
+        <!-- 메타 정보 및 통계 (작성자/작성일 vs 조회/추천) -->
+        <div class="d-flex justify-content-between text-muted mb-3">
+            <div>
+                <span th:text="'작성자: ' + ${post.user.nickname}">작성자</span>
+                |
+                <span th:text="'작성일: ' + ${#temporals.format(post.createDate, 'yyyy-MM-dd HH:mm')}">2025-07-14 14:00</span>
+            </div>
+            <div>
+                <span th:text="'조회: ' + ${post.hits}">조회수</span>
+                |
+                <span th:text="'좋아요: ' + ${post.likes}">추천수</span>
+            </div>
+        </div>
+
+        <!-- 본문 내용 -->
+        <div class="mb-4" th:utext="${post.content}">
+            <!-- HTML 형식으로 렌더링 되는 게시글 내용 -->
+        </div>
+
+        <div class="mb-4 mt-4">
+            <div class="d-flex mb-4">
+                <span>좋아요</span>
+                <span>댓글</span>
+            </div>
+
+            <!-- 댓글 리스트 -->
+            <div>
+                <div th:each="comment : ${comments}"
+                     class="comment-item toggle-reply-btn mb-3 border rounded p-2"
+                     th:attr="data-comment-id=${comment.id}"
+                     style="cursor:pointer;">
+                    <div class="text-muted small mb-1 d-flex justify-content-between">
+                        <span th:text="${comment.nickname}">닉네임</span>
+                        <span th:text="${#temporals.format(comment.createDate, 'MM-dd HH:mm')}">날짜</span>
+                    </div>
+                    <div class="ms-3" th:utext="${comment.content}">댓글 내용</div>
+
+                    <!-- 대댓글 -->
+                    <div th:each="reply : ${comment.replies}" class="ms-4 p-2 my-box mt-2 p-3">
+                        <div class="text-muted small mb-1 d-flex justify-content-between">
+                            <span th:text="${reply.nickname}">닉네임</span>
+                            <span th:text="${#temporals.format(reply.createDate, 'MM-dd HH:mm')}">날짜</span>
+                        </div>
+                        <div class="ms-3" th:utext="${reply.content}">댓글 내용</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 댓글 입력 창-->
+            <div>
+                <div sec:authorize="isAnonymous()" class="my-box">
+                    로그인 후 댓글을 입력하세요
+                </div>
+                <div sec:authorize="isAuthenticated()" class="my-box">
+                    <div class="form-label mb-2">
+                        <strong th:text="${#authentication.principal.nickname}">닉네임</strong>
+                    </div>
+                    <form th:action="@{/post/{postId}/comments(postId=${post.id})}" method="post">
+                    <textarea
+                            class="form-control"
+                            name="content"
+                            rows="2"
+                            placeholder="댓글을 입력하세요"
+                            aria-label="댓글 입력"
+                    ></textarea>
+                        <div class="d-flex justify-content-end mt-2">
+                            <button class="btn btn-primary" type="submit">등록</button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
+            <!-- 대댓글 템플릿 -->
+            <div id="reply-form-template" class="d-none">
+                <div class="ms-4 p-2 my-box mt-2 p-3 reply-box">
+                    <form th:action="@{/post/{postId}/comments(postId=${post.id})}" method="post">
+                        <input type="hidden" name="parentCommentId" value="" />
+                        <div class="form-label mb-2">
+                            <strong th:text="${#authentication.principal.nickname}">닉네임</strong>
+                        </div>
+                        <textarea class="form-control form-control-sm mb-2" name="content"
+                                  rows="2" placeholder="답글을 입력하세요"></textarea>
+                        <div class="d-flex justify-content-end">
+                            <button class="btn btn-secondary btn-sm" type="submit">등록</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+        <!-- 액션 버튼 -->
+        <div class="mb-5">
+            <a th:href="@{/board}" class="btn btn-secondary me-2">목록</a>
+            <a th:href="@{/board/edit/{id}(id=${post.id})}" class="btn btn-primary me-2">수정</a>
+            <form th:action="@{/board/delete/{id}(id=${post.id})}" method="post" style="display:inline;">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('정말 삭제하시겠습니까?');">삭제</button>
+            </form>
+        </div>
+    </div>
+    </div>
+
+
+<!-- Bootstrap JS -->
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.comment-item.toggle-reply-btn').forEach(item => {
+            item.addEventListener('click', (e) => {
+                // 답글 폼 내부 클릭 시 토글 로직이 실행되는 걸 방지
+                if (e.target.closest('.reply-box')) return;
+
+                const existing = item.querySelector('.reply-box');
+                if (existing) {
+                    existing.remove();
+                    return;
+                }
+
+                // 기존 폼 전부 제거(안정성)
+                item.querySelectorAll('.reply-box').forEach(el => el.remove());
+
+                // 템플릿 복제 후 parentCommentId 세팅
+                const tpl = document.getElementById('reply-form-template').firstElementChild;
+                const clone = tpl.cloneNode(true);
+                clone.querySelector('input[name="parentCommentId"]').value =
+                    item.getAttribute('data-comment-id');
+                item.appendChild(clone);
+            });
+        });
+    });
+</script>
+
+
+</body>
+</html>

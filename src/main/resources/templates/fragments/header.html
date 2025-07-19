@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Fragments</title>
+</head>
+<body>
+<!-- 헤더 프래그먼트 정의 -->
+<div th:fragment="siteHeader">
+    <h2 class="mb-4">📋 게시판</h2>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4 rounded">
+        <div class="container-fluid">
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">인기글</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/post">전체글</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <div sec:authorize="isAnonymous()">
+                        <a href="/oauth2/authorization/google"><img src="/images/google_login@1x.png"></a>
+                    </div>
+                    <div sec:authorize="isAuthenticated()">
+                        <a href="/#" class="btn btn-outline-dark me-2">회원 정보 수정</a>
+                        <a href="/logout" class="btn btn-outline-dark me-2">로그아웃</a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </nav>
+</div>
+</body>
+</html>

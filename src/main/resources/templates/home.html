@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Board</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS (정적 파일 기준) -->
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+</head>
+<body>
+
+<div class="container mt-4">
+    <div th:replace="fragments/header :: siteHeader"></div>
+
+    <!-- 글쓰기 버튼 -->
+    <div class="mb-3 text-end">
+        <a href="/post/new" class="btn btn-primary">글쓰기</a>
+    </div>
+
+    <!-- 게시글 테이블 -->
+    <table class="table table-hover table-bordered">
+        <colgroup>
+            <col style="width: 70%"> <!-- 제목 -->
+            <col style="width: 10%"> <!-- 글쓴이 -->
+            <col style="width: 10%"> <!-- 작성일 -->
+            <col style="width: 5%"> <!-- 조회 -->
+            <col style="width: 5%"> <!-- 추천 -->
+        </colgroup>
+        <thead class="table-light">
+        <tr>
+            <th>제목</th>
+            <th>글쓴이</th>
+            <th>작성일</th>
+            <th>조회</th>
+            <th>추천</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Thymeleaf 반복문 -->
+        <tr th:each="post : ${posts}">
+            <td th:onclick="|location.href='/post/${post.id}'|" style="cursor: pointer;">
+                <span th:text="${post.title}">제목</span>
+            </td>
+            <td th:text="${post.user.nickname}">작성자</td>
+            <td th:text="${#temporals.format(post.createDate, 'MM-dd')}">07-10</td>
+            <td th:text="${post.hits}">조회수</td>
+            <td th:text="${post.likes}">추천수</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Bootstrap JS -->
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>
