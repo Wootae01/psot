@@ -19,12 +19,6 @@ spring:
     console:
       enabled: true
 
-
-
-
-
-
-
 logging:
   level:
     org.hibernate.descriptor.sql.BasicBinder: trace
