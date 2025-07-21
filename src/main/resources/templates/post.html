@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>post</title>
     <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <style>
         .my-box {
             border: 3px solid;
@@ -39,6 +40,16 @@
         <!-- 본문 내용 -->
         <div class="mb-4" th:utext="${post.content}">
             <!-- HTML 형식으로 렌더링 되는 게시글 내용 -->
+        </div>
+
+        <!--좋아요 버튼 -->
+        <div class="d-flex flex-column justify-content-center align-items-center mb-4">
+            <button id="likeBtn" type="button" class="btn btn-link p-1" th:attr="data-post-id=${post.id}">
+
+                <i id="likeIcon" th:class="${hasLiked} ? 'bi bi-hand-thumbs-up-fill text-primary fs-3'
+                    : 'bi bi-hand-thumbs-up text-primary fs-3'"></i>
+            </button>
+            <span id="likeCount" class="text-primary" th:text="${post.likes}">좋아요 수</span>
         </div>
 
         <div class="mb-4 mt-4">
@@ -98,17 +109,23 @@
             <!-- 대댓글 템플릿 -->
             <div id="reply-form-template" class="d-none">
                 <div class="ms-4 p-2 my-box mt-2 p-3 reply-box">
-                    <form th:action="@{/post/{postId}/comments(postId=${post.id})}" method="post">
-                        <input type="hidden" name="parentCommentId" value="" />
-                        <div class="form-label mb-2">
-                            <strong th:text="${#authentication.principal.nickname}">닉네임</strong>
-                        </div>
-                        <textarea class="form-control form-control-sm mb-2" name="content"
-                                  rows="2" placeholder="답글을 입력하세요"></textarea>
-                        <div class="d-flex justify-content-end">
-                            <button class="btn btn-secondary btn-sm" type="submit">등록</button>
-                        </div>
-                    </form>
+                    <div sec:authorize="isAnonymous()" class="my-box">
+                        로그인 후 댓글을 입력하세요.
+                    </div>
+                    <div sec:authorize="isAuthenticated()">
+                        <form th:action="@{/post/{postId}/comments(postId=${post.id})}" method="post">
+                            <input type="hidden" name="parentCommentId" value="" />
+                            <div class="form-label mb-2">
+                                <strong th:text="${#authentication.principal?.nickname}">닉네임</strong>
+                            </div>
+                            <textarea class="form-control form-control-sm mb-2" name="content"
+                                      rows="2" placeholder="답글을 입력하세요"></textarea>
+                            <div class="d-flex justify-content-end">
+                                <button class="btn btn-secondary btn-sm" type="submit">등록</button>
+                            </div>
+                        </form>
+                    </div>
+
                 </div>
             </div>
 
@@ -127,32 +144,9 @@
 
 <!-- Bootstrap JS -->
 <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.comment-item.toggle-reply-btn').forEach(item => {
-            item.addEventListener('click', (e) => {
-                // 답글 폼 내부 클릭 시 토글 로직이 실행되는 걸 방지
-                if (e.target.closest('.reply-box')) return;
 
-                const existing = item.querySelector('.reply-box');
-                if (existing) {
-                    existing.remove();
-                    return;
-                }
-
-                // 기존 폼 전부 제거(안정성)
-                item.querySelectorAll('.reply-box').forEach(el => el.remove());
-
-                // 템플릿 복제 후 parentCommentId 세팅
-                const tpl = document.getElementById('reply-form-template').firstElementChild;
-                const clone = tpl.cloneNode(true);
-                clone.querySelector('input[name="parentCommentId"]').value =
-                    item.getAttribute('data-comment-id');
-                item.appendChild(clone);
-            });
-        });
-    });
-</script>
+<script type="module" th:src="@{/js/post/comments.js}"></script>
+<script type="module" th:src="@{/js/post/like.js}"></script>
 
 
 </body>

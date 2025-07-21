@@ -34,4 +34,16 @@ public class Post extends BaseEntity{
 	private String content;
 	private Integer hits;
 	private Integer likes;
+
+	public void increaseHits() {
+		this.hits++;
+	}
+
+	public void increaseLikes() {
+		this.likes++;
+	}
+
+	public void decreaseLikes() {
+		this.likes--;
+	}
 }

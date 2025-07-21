@@ -2,6 +2,7 @@ package com.example.board.oauth2;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -19,7 +20,11 @@ public class CustomOauth2User implements OAuth2User {
 
 	@Override
 	public Map<String, Object> getAttributes() {
-		return null;
+		Map<String, Object> attrs = new HashMap<>();
+		attrs.put("username", userDTO.getUsername());
+		attrs.put("nickname", userDTO.getNickname());
+		attrs.put("role", userDTO.getRole());
+		return attrs;
 	}
 
 	@Override
@@ -38,9 +43,13 @@ public class CustomOauth2User implements OAuth2User {
 
 	@Override
 	public String getName() {
-		//principle 식별자는 username 으로 설정
+		return userDTO.getName();
+	}
+
+	public String getUsername() {
 		return userDTO.getUsername();
 	}
+
 
 	public String getNickname() {
 		return userDTO.getNickname();

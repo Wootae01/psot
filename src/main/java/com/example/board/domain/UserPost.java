@@ -9,9 +9,18 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import javax.swing.*;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
 public class UserPost {
+
 	@Id
 	@Column(name = "user_post_id")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,4 +36,10 @@ public class UserPost {
 
 	@Enumerated(EnumType.STRING)
 	private ActionType type;
+
+	public UserPost(User user, Post post, ActionType actionType) {
+		this.user = user;
+		this.post = post;
+		this.type = actionType;
+	}
 }
