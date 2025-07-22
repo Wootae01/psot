@@ -28,7 +28,7 @@
             <div>
                 <span th:text="'작성자: ' + ${post.user.nickname}">작성자</span>
                 |
-                <span th:text="'작성일: ' + ${#temporals.format(post.createDate, 'yyyy-MM-dd HH:mm')}">2025-07-14 14:00</span>
+                <span th:text="'작성일: ' + ${#temporals.format(post.createDate, 'yyyy. MM. dd. HH:mm')}">2025. 07. 14. 14:00</span>
             </div>
             <div>
                 <span th:text="'조회: ' + ${post.hits}">조회수</span>
@@ -59,14 +59,14 @@
             </div>
 
             <!-- 댓글 리스트 -->
-            <div>
+            <div id="commentList">
                 <div th:each="comment : ${comments}"
                      class="comment-item toggle-reply-btn mb-3 border rounded p-2"
                      th:attr="data-comment-id=${comment.id}"
                      style="cursor:pointer;">
                     <div class="text-muted small mb-1 d-flex justify-content-between">
                         <span th:text="${comment.nickname}">닉네임</span>
-                        <span th:text="${#temporals.format(comment.createDate, 'MM-dd HH:mm')}">날짜</span>
+                        <span th:text="${#temporals.format(comment.createDate, 'MM. dd. HH:mm')}">날짜</span>
                     </div>
                     <div class="ms-3" th:utext="${comment.content}">댓글 내용</div>
 
@@ -74,7 +74,7 @@
                     <div th:each="reply : ${comment.replies}" class="ms-4 p-2 my-box mt-2 p-3">
                         <div class="text-muted small mb-1 d-flex justify-content-between">
                             <span th:text="${reply.nickname}">닉네임</span>
-                            <span th:text="${#temporals.format(reply.createDate, 'MM-dd HH:mm')}">날짜</span>
+                            <span th:text="${#temporals.format(reply.createDate, 'MM. dd. HH:mm')}">날짜</span>
                         </div>
                         <div class="ms-3" th:utext="${reply.content}">댓글 내용</div>
                     </div>
@@ -90,8 +90,9 @@
                     <div class="form-label mb-2">
                         <strong th:text="${#authentication.principal.nickname}">닉네임</strong>
                     </div>
-                    <form th:action="@{/post/{postId}/comments(postId=${post.id})}" method="post">
+                    <form id="commentForm" th:attr="data-post-id=${post.id}" th:action="@{/post/{postId}/comments(postId=${post.id})}" method="post">
                     <textarea
+                            id="commentInput"
                             class="form-control"
                             name="content"
                             rows="2"
@@ -113,7 +114,7 @@
                         로그인 후 댓글을 입력하세요.
                     </div>
                     <div sec:authorize="isAuthenticated()">
-                        <form th:action="@{/post/{postId}/comments(postId=${post.id})}" method="post">
+                        <form th:action="@{/post/{postId}/comments(postId=${post.id})}" method="post" th:attr="data-post-id=${post.id}">
                             <input type="hidden" name="parentCommentId" value="" />
                             <div class="form-label mb-2">
                                 <strong th:text="${#authentication.principal?.nickname}">닉네임</strong>

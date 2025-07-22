@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.board.domain.*;
+import com.example.board.dto.CommentRequestDTO;
 import com.example.board.dto.LikeResponseDTO;
 import com.example.board.oauth2.CustomOauth2User;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.board.dto.CommentResponseDTO;
@@ -24,6 +26,8 @@ import com.example.board.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
 
 @Controller
@@ -109,12 +113,16 @@ public class PostController {
 	}
 
 	//댓글 작성
+	@ResponseBody
 	@PostMapping("/post/{postId}/comments")
-	public String saveComment(@PathVariable Long postId, @RequestParam String content,
-		@RequestParam(required = false, value = "parentCommentId") Long parentCommentId,
+	public CommentResponseDTO saveComment(@PathVariable Long postId,
+							  @RequestBody CommentRequestDTO requestDTO,
 							  @AuthenticationPrincipal CustomOauth2User customOauth2User) {
 
 		Comment parent = null;
+		Long parentCommentId = requestDTO.getParentCommentId();
+		String content = requestDTO.getContent();
+
 		if (parentCommentId != null) {
 			parent = commentService.findById(parentCommentId);
 		}
@@ -122,8 +130,10 @@ public class PostController {
 		String username = customOauth2User.getUsername();
 		User user = userService.findByUsername(username);
 
-		commentService.save(user, post, parent, content, 0);
-		return "redirect:/post/{postId}";
+		Comment save = commentService.save(user, post, parent, content, 0);
+		CommentResponseDTO dto = commentService.convertToCommentResponseDTO(save);
+
+		return dto;
 
 	}
 
