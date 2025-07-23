@@ -7,16 +7,15 @@ import com.example.board.domain.*;
 import com.example.board.dto.CommentRequestDTO;
 import com.example.board.dto.LikeResponseDTO;
 import com.example.board.oauth2.CustomOauth2User;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.board.dto.CommentResponseDTO;
 import com.example.board.dto.PostAddDTO;
@@ -27,7 +26,6 @@ import com.example.board.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
 
 @Controller
@@ -84,19 +82,26 @@ public class PostController {
 	 * @return 게시글 글쓰기 화면
 	 */
 
-	@GetMapping("/post/new")
-	public String writePost() {
+	@GetMapping("/post/add")
+	public String writePost(Model model) {
+		model.addAttribute("post", new PostAddDTO());
 		return "writePost";
 	}
 
 	//게시글 등록
-	@PostMapping("/post/new")
-	public String savePost(PostAddDTO dto, @AuthenticationPrincipal CustomOauth2User customOauth2User) {
+	@PostMapping("/post/add")
+	public String savePost(@Validated @ModelAttribute("post") PostAddDTO dto, BindingResult bindingResult,
+						   @AuthenticationPrincipal CustomOauth2User customOauth2User) {
 
 		//로그인 하지 않은 사용자인 경우
 		if (customOauth2User == null) {
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
 		}
+		if (bindingResult.hasErrors()) {
+			log.info("post add errors={}", bindingResult);
+			return "writePost";
+		}
+
 
 		String username = customOauth2User.getUsername();
 

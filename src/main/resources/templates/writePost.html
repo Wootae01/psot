@@ -19,19 +19,22 @@
 <body>
 
 <div class="container mt-4">
-    <div th:replace="fragments/header :: siteHeader"></div>
+    <div th:replace="~{fragments/header :: siteHeader}"></div>
     <h3 class="mb-4">✍️ 게시글 작성</h3>
 
-    <form th:action="@{/post/new}" method="post" onsubmit="syncEditor()">
+    <form th:action="@{/post/add}"
+          th:object="${post}"
+          method="post"
+          onsubmit="syncEditor()">
         <div class="mb-3">
-            <label for="title" class="form-label">제목</label>
+            <label for="title" class="form-label" >제목</label>
             <input type="text"
+                   th:field="*{title}"
                    id="title"
-                   name="title"
                    class="form-control"
                    placeholder="제목을 입력하세요"
-                   required
-                   th:value="${post?.title}">
+                   >
+            <div th:errors="*{title}" th:errorclass="text-danger"></div>
         </div>
 
         <div class="mb-3">
@@ -39,7 +42,8 @@
             <!-- Quill 에디터 구역 -->
             <div id="editor" th:utext="${post?.content}"></div>
             <!-- 실제로 서버에 보낼 hidden input -->
-            <input type="hidden" name="content" id="content">
+            <input type="hidden" th:field="*{content}" id="content">
+            <div th:errors="*{content}" th:errorclass="text-danger"></div>
         </div>
 
         <div class="d-flex justify-content-end">
@@ -67,6 +71,10 @@
             ]
         }
     });
+    const contentInput = document.getElementById('content');
+    const html = contentInput.value;
+    const delta = quill.clipboard.convert({ html });
+    quill.setContents(delta, 'silent');
 
     // 폼 제출 전에 Quill 내용 동기화
     function syncEditor() {

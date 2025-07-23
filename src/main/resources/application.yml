@@ -3,6 +3,8 @@ spring:
     import: classpath:application-key.yml
   application:
     name: board
+  messages:
+    basename: messages
   jpa:
     show-sql: true
     properties:
