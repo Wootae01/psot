@@ -33,7 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const form     = e.target;
         const textarea = form.querySelector('textarea[name="content"]');
         const content  = textarea.value.trim();
-        if (!content) return;
+        if (!content) {
+            alert('댓글을 입력해주세요');
+            return;
+        }
 
         const parentInput     = form.querySelector('input[name="parentCommentId"]');
         const parentCommentId = parentInput?.value || null;

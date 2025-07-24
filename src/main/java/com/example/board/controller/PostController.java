@@ -7,7 +7,6 @@ import com.example.board.domain.*;
 import com.example.board.dto.CommentRequestDTO;
 import com.example.board.dto.LikeResponseDTO;
 import com.example.board.oauth2.CustomOauth2User;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -121,8 +120,13 @@ public class PostController {
 	@ResponseBody
 	@PostMapping("/post/{postId}/comments")
 	public CommentResponseDTO saveComment(@PathVariable Long postId,
-							  @RequestBody CommentRequestDTO requestDTO,
+							  @RequestBody @Validated CommentRequestDTO requestDTO,
+							  BindingResult bindingResult,
 							  @AuthenticationPrincipal CustomOauth2User customOauth2User) {
+
+		if (bindingResult.hasGlobalErrors()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid comment data");
+		}
 
 		Comment parent = null;
 		Long parentCommentId = requestDTO.getParentCommentId();
