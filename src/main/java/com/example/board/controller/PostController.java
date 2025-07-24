@@ -6,6 +6,8 @@ import java.util.List;
 import com.example.board.domain.*;
 import com.example.board.dto.CommentRequestDTO;
 import com.example.board.dto.LikeResponseDTO;
+import com.example.board.dto.PostDTO;
+import com.example.board.dto.PostUpdateDTO;
 import com.example.board.oauth2.CustomOauth2User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -69,8 +71,8 @@ public class PostController {
 			response.add(dto);
 		}
 
-
-		model.addAttribute("post", post);
+		PostDTO postDTO = postService.contertToPostDTO(post);
+		model.addAttribute("post", postDTO);
 		model.addAttribute("comments", response);
 		return "post";
 	}
@@ -157,5 +159,50 @@ public class PostController {
 
 		LikeResponseDTO dto = postService.pushLike(user, post);
 		return new ResponseEntity<>(dto, HttpStatus.OK);
+	}
+
+	@GetMapping("/post/{postId}/edit")
+	public String getEditPost(@PathVariable Long postId, @AuthenticationPrincipal CustomOauth2User oauth2User, Model model) {
+		Post post = postService.findPostById(postId);
+		if (!post.getUser().getUsername().equals(oauth2User.getUsername())) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "권한이 없습니다.");
+		}
+		PostAddDTO postAddDTO = new PostAddDTO();
+		postAddDTO.setContent(post.getContent());
+		postAddDTO.setTitle(post.getTitle());
+		model.addAttribute("postId", postId);
+		model.addAttribute("post", postAddDTO);
+
+		return "editPost";
+	}
+
+	@PostMapping("/post/{postId}/edit")
+	public String editPost(@PathVariable Long postId, @AuthenticationPrincipal CustomOauth2User oauth2User,
+		@Validated @ModelAttribute("post") PostUpdateDTO dto, BindingResult bindingResult, Model model) {
+
+		Post post = postService.findPostById(postId);
+		if (!post.getUser().getUsername().equals(oauth2User.getUsername())) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "권한이 없습니다.");
+		}
+
+		if (bindingResult.hasErrors()) {
+			log.info("post edit errors={}", bindingResult);
+			model.addAttribute("postId", postId);
+			return "editPost";
+		}
+
+		postService.updatePost(postId, dto);
+		return "redirect:/post/"+postId;
+	}
+
+	@PostMapping("/post/{postId}/delete")
+	public String deletePost(@PathVariable Long postId, @AuthenticationPrincipal CustomOauth2User oauth2User) {
+		Post post = postService.findPostById(postId);
+		if (!post.getUser().getUsername().equals(oauth2User.getUsername())) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "권한이 없습니다.");
+		}
+
+		postService.deletePost(postId);
+		return "redirect:/post";
 	}
 }

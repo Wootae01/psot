@@ -7,6 +7,7 @@ import com.example.board.domain.ActionType;
 import com.example.board.domain.User;
 import com.example.board.domain.UserPost;
 import com.example.board.dto.LikeResponseDTO;
+import com.example.board.dto.PostUpdateDTO;
 import com.example.board.error.ResourceNotFoundException;
 import com.example.board.repository.UserPostRepository;
 import org.springframework.stereotype.Service;
@@ -63,12 +64,10 @@ public class PostService {
 		return postRepository.findAll();
 	}
 
-	public void updatePost(Long id, PostDTO dto) {
+	public void updatePost(Long id, PostUpdateDTO dto) {
 		Post post = postRepository.findById(id).orElseThrow();
 		post.setContent(dto.getContent());
 		post.setTitle(dto.getTitle());
-		post.setHits(dto.getHits());
-		post.setLikes(dto.getLikes());
 	}
 
 	public void deletePost(Long id) {
@@ -76,6 +75,19 @@ public class PostService {
 			.orElseThrow(() -> new ResourceNotFoundException("해당 게시글을 찾을 수 없습니다."));
 
 		postRepository.delete(post);
+	}
+
+	public PostDTO contertToPostDTO(Post post) {
+		PostDTO postDTO = new PostDTO();
+		postDTO.setId(post.getId());
+		postDTO.setCreateDate(post.getCreateDate());
+		postDTO.setNickname(post.getUser().getNickname());
+		postDTO.setUsername(post.getUser().getUsername());
+		postDTO.setTitle(post.getTitle());
+		postDTO.setContent(post.getContent());
+		postDTO.setLikes(post.getLikes());
+		postDTO.setHits(post.getHits());
+		return postDTO;
 	}
 
 }

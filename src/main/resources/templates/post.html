@@ -26,7 +26,7 @@
         <!-- 메타 정보 및 통계 (작성자/작성일 vs 조회/추천) -->
         <div class="d-flex justify-content-between text-muted mb-3">
             <div>
-                <span th:text="'작성자: ' + ${post.user.nickname}">작성자</span>
+                <span th:text="'작성자: ' + ${post.nickname}">작성자</span>
                 |
                 <span th:text="'작성일: ' + ${#temporals.format(post.createDate, 'yyyy. MM. dd. HH:mm')}">2025. 07. 14. 14:00</span>
             </div>
@@ -133,11 +133,14 @@
         </div>
         <!-- 액션 버튼 -->
         <div class="mb-5">
-            <a th:href="@{/board}" class="btn btn-secondary me-2">목록</a>
-            <a th:href="@{/board/edit/{id}(id=${post.id})}" class="btn btn-primary me-2">수정</a>
-            <form th:action="@{/board/delete/{id}(id=${post.id})}" method="post" style="display:inline;">
-                <button type="submit" class="btn btn-danger" onclick="return confirm('정말 삭제하시겠습니까?');">삭제</button>
-            </form>
+            <a th:href="@{/post}" class="btn btn-secondary me-2">목록</a>
+            <span sec:authorize="isAuthenticated()" th:if="${#authentication.principal?.username == post.username}">
+                <a th:href="@{/post/{postId}/edit(postId=${post.id})}" class="btn btn-primary me-2">수정</a>
+                <form th:action="@{/post/{postId}/delete(postId=${post.id})}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('정말 삭제하시겠습니까?');">삭제</button>
+                </form>
+            </span>
+
         </div>
     </div>
     </div>
