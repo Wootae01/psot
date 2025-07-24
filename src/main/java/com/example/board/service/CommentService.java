@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import com.example.board.error.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +38,7 @@ public class CommentService {
 
 	public Comment findById(Long id) {
 		return commentRepository.findById(id)
-			.orElseThrow(() -> new NoSuchElementException("comment not found"));
+			.orElseThrow(() -> new ResourceNotFoundException("댓글을 찾을 수 없습니다."));
 	}
 
 	public List<Comment> findRootComments(Long postId) {
@@ -66,13 +67,13 @@ public class CommentService {
 
 	public void update(Long id, CommentResponseDTO commentDTO) {
 		Comment comment = commentRepository.findById(id)
-			.orElseThrow(() -> new NoSuchElementException("comment not found"));
+			.orElseThrow(() -> new ResourceNotFoundException("댓글을 찾을 수 없습니다."));
 		comment.setContent(commentDTO.getContent());
 	}
 
 	public void delete(Long id) {
 		Comment comment = commentRepository.findById(id)
-			.orElseThrow(() -> new NoSuchElementException("comment not found"));
+			.orElseThrow(() -> new ResourceNotFoundException("댓글을 찾을 수 없습니다."));
 
 		commentRepository.delete(comment);
 	}

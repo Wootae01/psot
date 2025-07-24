@@ -7,6 +7,7 @@ import com.example.board.domain.ActionType;
 import com.example.board.domain.User;
 import com.example.board.domain.UserPost;
 import com.example.board.dto.LikeResponseDTO;
+import com.example.board.error.ResourceNotFoundException;
 import com.example.board.repository.UserPostRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +32,7 @@ public class PostService {
 	//게시글 조회수 올리는 메서드
 	public Post viewPost(Long id) {
 		Post post = postRepository.findById(id)
-				.orElseThrow(() -> new NoSuchElementException("The id of this post does not exist"));
+				.orElseThrow(() -> new ResourceNotFoundException("해당 게시글을 찾을 수 없습니다."));
 		post.increaseHits();
 		return post;
 	}
@@ -56,7 +57,7 @@ public class PostService {
 
 	public Post findPostById(Long id) {
 		return postRepository.findById(id)
-			.orElseThrow(()->new NoSuchElementException("The id of this post does not exist"));
+			.orElseThrow(()->new ResourceNotFoundException("해당 게시글을 찾을 수 없습니다."));
 	}
 	public List<Post> findAllPosts() {
 		return postRepository.findAll();
@@ -72,7 +73,7 @@ public class PostService {
 
 	public void deletePost(Long id) {
 		Post post = postRepository.findById(id)
-			.orElseThrow(() -> new NoSuchElementException("The id of this post does not exist"));
+			.orElseThrow(() -> new ResourceNotFoundException("해당 게시글을 찾을 수 없습니다."));
 
 		postRepository.delete(post);
 	}
